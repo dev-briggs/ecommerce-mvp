@@ -74,7 +74,7 @@ const imageSchema =
           }
         );
 
-export const addProductSchema = z.object({
+export const productSchemaBase = z.object({
   name: z.string().min(1, "Required"),
   priceInCents: z.coerce
     .number({ message: "Required" })
@@ -82,6 +82,20 @@ export const addProductSchema = z.object({
     .min(1)
     .positive("Must be greater than 0"),
   description: z.string().min(1, "Required"),
-  file: fileSchema.refine((file) => file?.size > 0, "Required"),
-  image: imageSchema.refine((file) => file?.size > 0, "Required"),
 });
+
+export const addProductSchema = z
+  .object({
+    file: fileSchema.refine((file) => file?.size > 0, "Required"),
+    image: imageSchema.refine((file) => file?.size > 0, "Required"),
+  })
+  .merge(productSchemaBase);
+
+export const editProductSchema = z
+  .object({
+    file: fileSchema.optional(),
+    image: imageSchema.optional(),
+  })
+  .merge(productSchemaBase);
+
+export const productFormSchema = z.union([addProductSchema, editProductSchema]);

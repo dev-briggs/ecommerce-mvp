@@ -13,28 +13,44 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/formatter";
-import { ACCEPTED_IMAGE_TYPES, addProductSchema } from "@/schema/products";
-import { AddProductError, addProduct } from "@/server/actions/product";
+import {
+  ACCEPTED_IMAGE_TYPES,
+  addProductSchema,
+  productFormSchema,
+} from "@/schema/products";
+import { addProduct, updateProduct } from "@/server/actions/product";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Product } from "@prisma/client";
+import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-export default function ProductForm() {
-  const form = useForm<z.infer<typeof addProductSchema>>({
-    resolver: zodResolver(addProductSchema),
-    defaultValues: {
-      name: "",
-      priceInCents: 0,
-      description: "",
-      file: new File([], ""),
-      image: new File([], ""),
-    },
+export default function ProductForm({ product }: { product?: Product | null }) {
+  const addProductDefaultValues = {
+    name: "",
+    priceInCents: 0,
+    description: "",
+    file: new File([], ""),
+    image: new File([], ""),
+  };
+
+  const editProductDefaultValues = {
+    name: product?.name,
+    priceInCents: product?.priceInCents,
+    description: product?.description,
+  };
+
+  const form = useForm<z.infer<typeof productFormSchema>>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: !product
+      ? addProductDefaultValues
+      : editProductDefaultValues,
   });
 
-  async function onSubmit(values: z.infer<typeof addProductSchema>) {
-    const data = await addProduct(values);
-
+  async function onSubmit(values: z.infer<typeof productFormSchema>) {
+    const action = !product ? addProduct : updateProduct.bind(null, product.id);
+    const data = await action(values);
     if (data?.error) {
       form.setError("root", {
         message: "There was an error saving your product",
@@ -114,6 +130,9 @@ export default function ProductForm() {
                 />
               </FormControl>
               <FormMessage />
+              {!!product && (
+                <div className="text-muted-foreground">{product.filePath}</div>
+              )}
             </FormItem>
           )}
         />
@@ -134,6 +153,14 @@ export default function ProductForm() {
                 />
               </FormControl>
               <FormMessage />
+              {!!product && (
+                <Image
+                  src={`/${product.imagePath}`}
+                  height="200"
+                  width="200"
+                  alt="Product Image"
+                ></Image>
+              )}
             </FormItem>
           )}
         />

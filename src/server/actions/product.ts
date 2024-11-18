@@ -1,12 +1,13 @@
 "use server";
 
 import { z } from "zod";
-import { addProductSchema } from "@/schema/products";
+import { addProductSchema, editProductSchema } from "@/schema/products";
 import db from "@/db";
 import fs from "fs/promises";
 import { notFound, redirect } from "next/navigation";
 
 export type AddProductError = z.ZodError<typeof addProductSchema>;
+export type EditProductError = z.ZodError<typeof editProductSchema>;
 
 export async function addProduct(
   unsafeData: z.infer<typeof addProductSchema>
@@ -45,6 +46,54 @@ export async function addProduct(
   ]);
 
   redirect("/admin/products");
+}
+
+export async function updateProduct(
+  id: string,
+  unsafeData: z.infer<typeof editProductSchema>
+): Promise<{ error: EditProductError } | undefined> {
+  const {
+    success,
+    data: safeData,
+    error,
+  } = editProductSchema.safeParse(unsafeData);
+  if (!success) return { error };
+
+  const product = await db.product.findUnique({ where: { id } });
+
+  if (!product) return notFound();
+
+  let filePath = product.filePath;
+  if (!!safeData.file && safeData.file.size > 0) {
+    await fs.unlink(product.filePath);
+    filePath = `products/${crypto.randomUUID()}-${safeData.file.name}`;
+    await fs.writeFile(
+      filePath,
+      Buffer.from(await safeData.file.arrayBuffer())
+    );
+  }
+
+  let imagePath = product.imagePath;
+  if (!!safeData.image && safeData.image.size > 0) {
+    await fs.unlink(`public/${product.imagePath}`);
+    imagePath = `products/${crypto.randomUUID()}-${safeData.image.name}`;
+    await fs.writeFile(
+      `public/${imagePath}`,
+      Buffer.from(await safeData.image.arrayBuffer())
+    );
+  }
+
+  await db.product.update({
+    where: { id },
+    data: {
+      name: safeData.name,
+      description: safeData.description,
+      priceInCents: safeData.priceInCents,
+      filePath,
+      imagePath,
+    },
+  }),
+    redirect("/admin/products");
 }
 
 export async function toggleProductAvailability(
