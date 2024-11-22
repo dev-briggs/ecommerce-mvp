@@ -1,13 +1,14 @@
 import React, { Suspense } from "react";
 import ProductCard, { ProductCardSkeleton } from "../_components/ProductCard";
 import db from "@/db";
+import { cache } from "@/lib/cache";
 
-async function getProducts() {
+const getProducts = cache(async () => {
   return await db.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { name: "asc" },
   });
-}
+}, ["/products", "getProducts"]);
 
 export default function ProductsPage() {
   return (

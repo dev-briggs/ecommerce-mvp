@@ -5,6 +5,7 @@ import { addProductSchema, editProductSchema } from "@/schema/products";
 import db from "@/db";
 import fs from "fs/promises";
 import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export type AddProductError = z.ZodError<typeof addProductSchema>;
 export type EditProductError = z.ZodError<typeof editProductSchema>;
@@ -45,6 +46,8 @@ export async function addProduct(
     }),
   ]);
 
+  revalidatePath("/");
+  revalidatePath("/products");
   redirect("/admin/products");
 }
 
@@ -92,8 +95,11 @@ export async function updateProduct(
       filePath,
       imagePath,
     },
-  }),
-    redirect("/admin/products");
+  });
+
+  revalidatePath("/");
+  revalidatePath("/products");
+  redirect("/admin/products");
 }
 
 export async function toggleProductAvailability(
@@ -104,6 +110,9 @@ export async function toggleProductAvailability(
     where: { id },
     data: { isAvailableForPurchase },
   });
+
+  revalidatePath("/");
+  revalidatePath("/products");
   return product;
 }
 
@@ -113,4 +122,7 @@ export async function deleteProduct(id: string) {
 
   await fs.unlink(product.filePath);
   await fs.unlink(`public/product.ts${product.imagePath}`);
+
+  revalidatePath("/");
+  revalidatePath("/products");
 }

@@ -5,21 +5,27 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import ProductCard, { ProductCardSkeleton } from "./_components/ProductCard";
 import { Suspense } from "react";
+import { cache } from "@/lib/cache";
 
-async function getMostPopularProduct() {
-  return await db.product.findMany({
-    where: { isAvailableForPurchase: true },
-    orderBy: { orders: { _count: "desc" } },
-    take: 6,
-  });
-}
-async function getNewestProduct() {
+const getMostPopularProduct = cache(
+  async () => {
+    return await db.product.findMany({
+      where: { isAvailableForPurchase: true },
+      orderBy: { orders: { _count: "desc" } },
+      take: 6,
+    });
+  },
+  ["/", "getMostPopularProduct"],
+  { revalidate: 60 * 60 * 24 }
+);
+
+const getNewestProduct = cache(async () => {
   return await db.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { createdAt: "desc" },
     take: 6,
   });
-}
+}, ["/", "getNewestProduct"]);
 
 export default function HomePage() {
   return (
