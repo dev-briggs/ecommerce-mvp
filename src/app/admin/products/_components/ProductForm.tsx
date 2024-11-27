@@ -13,11 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/formatter";
-import {
-  ACCEPTED_IMAGE_TYPES,
-  addProductSchema,
-  productFormSchema,
-} from "@/schema/products";
+import { ACCEPTED_IMAGE_TYPES, productFormSchema } from "@/schema/products";
 import { addProduct, updateProduct } from "@/server/actions/product";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Product } from "@prisma/client";

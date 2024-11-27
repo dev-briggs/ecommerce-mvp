@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import ProductCard, { ProductCardSkeleton } from "../_components/ProductCard";
+import ProductCard, { ProductCardSkeleton } from "../../../features/products/components/ProductCard";
 import db from "@/db";
 import { cache } from "@/lib/cache";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { PageHeader } from "../_components/PageHeader";
+import { PageHeader } from "../../../features/admin/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {

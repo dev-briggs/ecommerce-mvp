@@ -3,7 +3,7 @@ import db from "@/db";
 import { Product } from "@prisma/client";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import ProductCard, { ProductCardSkeleton } from "./_components/ProductCard";
+import ProductCard, { ProductCardSkeleton } from "../../features/products/components/ProductCard";
 import { Suspense } from "react";
 import { cache } from "@/lib/cache";
 
