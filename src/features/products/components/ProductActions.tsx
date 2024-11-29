@@ -4,7 +4,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import {
   deleteProduct,
   toggleProductAvailability,
-} from "@/server/actions/product";
+} from "@/features/products/actions/product";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 

@@ -1,4 +1,4 @@
-import Nav, { NavLink } from "../../components/general/Nav";
+import Nav, { NavLink } from "@/components/general/Nav";
 
 export const dynamic = "force-dynamic"; // force NextJS to avoid caching every admin page
 
